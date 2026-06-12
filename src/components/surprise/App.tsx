@@ -20,6 +20,7 @@ import herAvatarFive from "../../../AvataresDela/Avatar dela 5.png";
 import herAvatarSix from "../../../AvataresDela/Avatar dela 6.png";
 import herAvatarSeven from "../../../AvataresDela/Avatar dela 7.png";
 import soundtrack from "../../../Music/aerosmith_sem_27_segundos_iniciais.mp3";
+import messageText from "../../../Mensagem/Mensagens.txt?raw";
 
 type Frame = {
   image: string;
@@ -79,6 +80,31 @@ const frames: Frame[] = [
   },
 ];
 
+const messageBlocks = messageText
+  .split(/\r?\n(?:\s*---+\s*|\s*\r?\n)+/g)
+  .map((block) => block.trim())
+  .filter(Boolean);
+
+const frameCount = Math.max(frames.length, messageBlocks.length);
+
+const storyFrames = Array.from({ length: frameCount }, (_, index) => {
+  const frame = frames[index % frames.length];
+  const block = messageBlocks[index];
+  if (!block) return frame;
+
+  const lines = block
+    .split(/\r?\n/g)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const [firstLine, ...rest] = lines;
+
+  return {
+    ...frame,
+    title: rest.length > 0 ? firstLine : `Mensagem ${index + 1}`,
+    message: rest.length > 0 ? rest.join("\n\n") : firstLine,
+  };
+});
+
 const herFrames = [
   herAvatarMain,
   herAvatarOne,
@@ -93,18 +119,8 @@ const herFrames = [
 export default function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeFrame, setActiveFrame] = useState(0);
-  const [musicPlaying, setMusicPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
   const [started, setStarted] = useState(false);
   const [introLoading, setIntroLoading] = useState(false);
-
-  useEffect(() => {
-    if (!started) return;
-    const timer = window.setInterval(() => {
-      setActiveFrame((current) => (current + 1) % frames.length);
-    }, 4600);
-    return () => window.clearInterval(timer);
-  }, [started]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -120,9 +136,8 @@ export default function App() {
       audio.currentTime = 0;
       try {
         await audio.play();
-        setMusicPlaying(true);
       } catch {
-        setMusicPlaying(false);
+        // Browser autoplay rules can still reject playback in unusual contexts.
       }
     }
     window.setTimeout(() => {
@@ -131,43 +146,17 @@ export default function App() {
     }, 3000);
   }
 
-  async function toggleMusic() {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (audio.paused) {
-      try {
-        await audio.play();
-        setMusicPlaying(true);
-        setStarted(true);
-      } catch {
-        setMusicPlaying(false);
-      }
-      return;
-    }
-
-    audio.pause();
-    setMusicPlaying(false);
-  }
-
-  function toggleMute() {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.muted = !audio.muted;
-    setMuted(audio.muted);
-  }
-
   function showPreviousFrame() {
     setStarted(true);
-    setActiveFrame((current) => (current - 1 + frames.length) % frames.length);
+    setActiveFrame((current) => (current - 1 + storyFrames.length) % storyFrames.length);
   }
 
   function showNextFrame() {
     setStarted(true);
-    setActiveFrame((current) => (current + 1) % frames.length);
+    setActiveFrame((current) => (current + 1) % storyFrames.length);
   }
 
-  const currentFrame = frames[activeFrame];
+  const currentFrame = storyFrames[activeFrame];
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#120d0a] text-[#fff8ef]">
@@ -175,8 +164,6 @@ export default function App() {
         ref={audioRef}
         src={soundtrack}
         loop
-        onPlay={() => setMusicPlaying(true)}
-        onPause={() => setMusicPlaying(false)}
       />
 
       {!started && (

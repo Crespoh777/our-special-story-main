@@ -392,6 +392,7 @@
   color: rgba(61, 33, 23, 0.82);
   font-size: clamp(1rem, 1.25vw, 1.35rem);
   line-height: 1.55;
+  white-space: pre-line;
 }
 .story-text-panel .story-text-kicker {
   margin-top: 0;
