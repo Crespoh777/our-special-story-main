@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import avatarMain from "../../../Avatares/Avatar.png";
 import avatarOne from "../../../Avatares/Avatar 1.png";
@@ -20,7 +19,7 @@ import herAvatarFour from "../../../AvataresDela/Avatar dela 4.png";
 import herAvatarFive from "../../../AvataresDela/Avatar dela 5.png";
 import herAvatarSix from "../../../AvataresDela/Avatar dela 6.png";
 import herAvatarSeven from "../../../AvataresDela/Avatar dela 7.png";
-import soundtrack from "../../../Music/Aerosmith - I Don't Want to Miss a Thing (Lyrics) - Loku (youtube).mp3";
+import soundtrack from "../../../Music/aerosmith_sem_27_segundos_iniciais.mp3";
 
 type Frame = {
   image: string;
@@ -97,6 +96,7 @@ export default function App() {
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [started, setStarted] = useState(false);
+  const [introLoading, setIntroLoading] = useState(false);
 
   useEffect(() => {
     if (!started) return;
@@ -109,19 +109,26 @@ export default function App() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = 0.55;
+    audio.volume = 0.28;
   }, []);
 
   async function startExperience() {
-    setStarted(true);
+    if (introLoading || started) return;
+    setIntroLoading(true);
     const audio = audioRef.current;
-    if (!audio) return;
-    try {
-      await audio.play();
-      setMusicPlaying(true);
-    } catch {
-      setMusicPlaying(false);
+    if (audio) {
+      audio.currentTime = 0;
+      try {
+        await audio.play();
+        setMusicPlaying(true);
+      } catch {
+        setMusicPlaying(false);
+      }
     }
+    window.setTimeout(() => {
+      setStarted(true);
+      setIntroLoading(false);
+    }, 3000);
   }
 
   async function toggleMusic() {
@@ -172,16 +179,34 @@ export default function App() {
         onPause={() => setMusicPlaying(false)}
       />
 
-      <div className="story-page-bg absolute inset-0" />
+      {!started && (
+        <section className="story-intro relative z-50 flex min-h-screen items-center justify-center px-6">
+          <div className="story-intro-content">
+            <p>
+              Oi, tudo bem? Que bom ver você aqui. Eu preparei isso com muito carinho. Não é
+              muito, mas foi de coração, e eu não podia deixar o Luke de fora kkkk. Espero que você
+              goste. Aproveite :)
+            </p>
+            <button
+              type="button"
+              onClick={startExperience}
+              disabled={introLoading}
+              className="story-intro-button"
+            >
+              {introLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Carregando
+                </>
+              ) : (
+                "Começar"
+              )}
+            </button>
+          </div>
+        </section>
+      )}
 
-      <div className="absolute right-4 top-4 z-30 flex items-center gap-2">
-        <IconButton label={musicPlaying ? "Pausar musica" : "Tocar musica"} onClick={toggleMusic}>
-          {musicPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-        </IconButton>
-        <IconButton label={muted ? "Ativar som" : "Silenciar"} onClick={toggleMute}>
-          {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-        </IconButton>
-      </div>
+      <div className="story-page-bg absolute inset-0" />
 
       <section className="story-stage relative z-10 flex min-h-screen items-center justify-center px-4 pb-36 pt-16 sm:pb-44">
         <button
@@ -214,17 +239,6 @@ export default function App() {
             <p>{currentFrame.message}</p>
           </aside>
         </div>
-
-        {!started && (
-          <button
-            onClick={startExperience}
-            className="absolute flex h-24 w-24 items-center justify-center rounded-full border border-[#f9c784]/55 bg-[#2a1a14]/85 text-[#fff8ef] shadow-2xl backdrop-blur-sm transition hover:scale-105 hover:bg-[#3b251c]"
-            aria-label="Comecar"
-            title="Comecar"
-          >
-            <Play className="ml-1 h-11 w-11" fill="currentColor" />
-          </button>
-        )}
 
         <button
           onClick={showNextFrame}
@@ -262,23 +276,3 @@ function HerFilmStrip() {
   );
 }
 
-function IconButton({
-  children,
-  label,
-  onClick,
-}: {
-  children: ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex h-11 w-11 items-center justify-center rounded-md border border-[#f9c784]/30 bg-black/28 text-[#fff8ef] shadow-lg backdrop-blur-sm transition hover:border-[#f9c784]/70 hover:bg-black/42"
-      aria-label={label}
-      title={label}
-    >
-      {children}
-    </button>
-  );
-}
