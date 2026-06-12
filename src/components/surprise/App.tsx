@@ -8,6 +8,10 @@ import avatarTwo from "../../../Avatares/Avatar 2.png";
 import avatarThree from "../../../Avatares/Avatar 3.png";
 import avatarFour from "../../../Avatares/Avatar 4.png";
 import dogAvatar from "../../../Avatares/Cachorro sem fundo.png";
+import dogAvatarOne from "../../../Avatares/Cachorro limpo 1.png";
+import dogAvatarTwo from "../../../Avatares/Cachorro limpo 2.png";
+import dogAvatarThree from "../../../Avatares/Cachorro limpo 3.png";
+import dogAvatarFour from "../../../Avatares/Cachorro limpo 4.png";
 import herAvatarMain from "../../../AvataresDela/Avatar dela.png";
 import herAvatarOne from "../../../AvataresDela/Avatar dela 1.png";
 import herAvatarTwo from "../../../AvataresDela/Avatar dela 2.png";
@@ -20,6 +24,7 @@ import soundtrack from "../../../Music/Aerosmith - I Don't Want to Miss a Thing 
 
 type Frame = {
   image: string;
+  dogImage: string;
   title: string;
   message: string;
 };
@@ -27,41 +32,49 @@ type Frame = {
 const frames: Frame[] = [
   {
     image: avatarMain,
+    dogImage: dogAvatar,
     title: "Eu fiz isso pensando em você.",
     message: "Cada imagem aqui é um pedacinho do carinho que eu queria te mostrar.",
   },
   {
     image: avatarOne,
+    dogImage: dogAvatarOne,
     title: "Você deixa tudo mais bonito.",
     message: "Até os momentos simples ficam especiais quando têm você no meio.",
   },
   {
     image: avatarTwo,
+    dogImage: dogAvatarTwo,
     title: "Eu guardo nossos detalhes.",
     message: "As conversas, as risadas, os jeitos e tudo que só a gente entende.",
   },
   {
     image: avatarThree,
+    dogImage: dogAvatarThree,
     title: "Tem coisa que vira lar.",
     message: "E estar perto de você virou uma dessas coisas para mim.",
   },
   {
     image: avatarFour,
+    dogImage: dogAvatarFour,
     title: "Eu escolheria você de novo.",
     message: "Em qualquer versão da história, em qualquer quadro, em qualquer dia.",
   },
   {
     image: avatarOne,
+    dogImage: dogAvatar,
     title: "Não quero perder nenhum detalhe.",
     message: "Por isso essa música, essa surpresa e esse jeito de te lembrar.",
   },
   {
     image: avatarThree,
+    dogImage: dogAvatarTwo,
     title: "Ainda tem muito para viver.",
     message: "Que venham mais capítulos, mais planos e mais motivos para sorrir.",
   },
   {
     image: avatarMain,
+    dogImage: dogAvatarFour,
     title: "Esse é só o começo.",
     message: "O resto da história eu quero continuar escrevendo com você.",
   },
@@ -159,7 +172,7 @@ export default function App() {
         onPause={() => setMusicPlaying(false)}
       />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_36%,rgba(249,199,132,0.16),transparent_34%),linear-gradient(135deg,#120d0a_0%,#21120d_48%,#0b1012_100%)]" />
+      <div className="story-page-bg absolute inset-0" />
 
       <div className="absolute right-4 top-4 z-30 flex items-center gap-2">
         <IconButton label={musicPlaying ? "Pausar musica" : "Tocar musica"} onClick={toggleMusic}>
@@ -170,7 +183,7 @@ export default function App() {
         </IconButton>
       </div>
 
-      <section className="relative z-10 flex min-h-screen items-center justify-center px-4 pb-36 pt-12 sm:pb-44">
+      <section className="story-stage relative z-10 flex min-h-screen items-center justify-center px-4 pb-36 pt-16 sm:pb-44">
         <button
           onClick={showPreviousFrame}
           className="absolute left-4 z-20 hidden h-12 w-12 items-center justify-center rounded-md border border-[#f9c784]/25 bg-black/25 text-[#fff8ef] backdrop-blur-sm transition hover:bg-black/40 md:flex"
@@ -180,26 +193,26 @@ export default function App() {
           <ChevronLeft className="h-7 w-7" />
         </button>
 
-        <div className="story-main-frame relative w-full max-w-5xl overflow-hidden rounded-2xl border border-[#f9c784]/35 bg-[#f6dfbd] shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
-          <img
-            key={activeFrame}
-            src={currentFrame.image}
-            alt="Avatar"
-            className="h-full max-h-[72vh] min-h-[360px] w-full animate-story-photo-in object-contain"
-          />
-          <img
-            src={dogAvatar}
-            alt="Cachorro"
-            className="pointer-events-none absolute bottom-2 right-2 w-[22%] min-w-24 max-w-56 drop-shadow-[0_16px_26px_rgba(0,0,0,0.28)]"
-          />
-          <div className="absolute bottom-4 left-4 max-w-[68%] rounded-lg border border-[#f9c784]/25 bg-[#120d0a]/58 px-4 py-3 text-[#fff8ef] shadow-xl backdrop-blur-sm sm:px-5 sm:py-4">
-            <h2 className="text-xl font-semibold leading-tight sm:text-3xl">
-              {currentFrame.title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#fff8ef]/82 sm:text-lg">
-              {currentFrame.message}
-            </p>
+        <div className="story-layout w-full max-w-7xl">
+          <div className="story-main-frame story-scene relative overflow-hidden rounded-2xl border border-[#f9c784]/55 shadow-[0_24px_80px_rgba(52,26,14,0.28)]">
+            <img
+              key={activeFrame}
+              src={currentFrame.image}
+              alt="Avatar"
+              className="story-avatar h-full w-full animate-story-photo-in object-contain object-center"
+            />
+            <img
+              src={currentFrame.dogImage}
+              alt="Cachorro"
+              className="story-dog pointer-events-none absolute animate-story-photo-in drop-shadow-[0_18px_24px_rgba(74,38,18,0.32)]"
+            />
           </div>
+
+          <aside className="story-text-panel">
+            <p className="story-text-kicker">Para você</p>
+            <h2>{currentFrame.title}</h2>
+            <p>{currentFrame.message}</p>
+          </aside>
         </div>
 
         {!started && (
